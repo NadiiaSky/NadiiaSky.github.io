@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lab 3</title>
+</head>
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r121/three.js"></script>
+    <script type="module">
+        import { OrbitControls } from "https://threejs.org/examples/jsm/controls/OrbitControls.js";
+        import { Object3D } from "https://threejs.org/build/three.module.js"
+        import { DeviceOrientationControls } from 'https://threejs.org/examples/jsm/controls/DeviceOrientationControls.js';
+
+        import { Matrix4 } from "https://threejs.org/build/three.module.js";
+
+        var degtorad = Math.PI / 180; // Degree-to-Radian conversion
+
+        function getRotationMatrix( alpha, beta, gamma ) {
+
+          var _x = beta  ? beta  * degtorad : 0; // beta value
+          var _y = gamma ? gamma * degtorad : 0; // gamma value
+          var _z = alpha ? alpha * degtorad : 0; // alpha value
+
+          var cX = Math.cos( _x );
+          var cY = Math.cos( _y );
+          var cZ = Math.cos( _z );
+          var sX = Math.sin( _x );
+          var sY = Math.sin( _y );
+          var sZ = Math.sin( _z );
+
+          //
+          // ZXY rotation matrix construction.
+          //
+
+          var m11 = cZ * cY - sZ * sX * sY;
+          var m12 = - cX * sZ;
+          var m13 = cY * sZ * sX + cZ * sY;
+
+          var m21 = cY * sZ + cZ * sX * sY;
+          var m22 = cZ * cX;
+          var m23 = sZ * sY - cZ * cY * sX;
+
+          var m31 = - cX * sY;
+          var m32 = sX;
+          var m33 = cX * cY;
+
+          return [
+            m11,    m12,    m13, 0,
+            m21,    m22,    m23, 0,
+            m31,    m32,    m33, 0,
+            0,      0,      0,   1,
+          ];
+
+        }
+
+        //var matrix = getRotationMatrix(0.5, 0.5, 0.5);
+        //const m = new Matrix4();
+
+        //m.fromArray(matrix)
+        //console.log(m.elements)
+
+        // console.log(matrix)
+
+        // set scene argument
+        var scene = new THREE.Scene();
+
+        // set camera argument
+        var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+
+        var renderer = new THREE.WebGLRenderer({antialias: true});
+        renderer.setSize( window.innerWidth, window.innerHeight );
+        document.body.appendChild( renderer.domElement );
+
+        // for manual rotation of the surface
+        var controls = new DeviceOrientationControls( camera, renderer.domElement );
+
+
+        // for adaptive resize of the window in the browser
+        window.addEventListener('resize', () => {
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+        })
+
+        // main function for generating the 3d figure
+        var createDingDong = function(u, v, vector3) {
+            //u in [0; 2Pi],  v in (-infinity; 1)
+            u *= 2 * Math.PI;
+            v = v * -2 + 1;
+
+
+            var arg = v * Math.sqrt(1 - v);
+            vector3.x = arg * Math.cos(u);
+            vector3.y = arg * Math.sin(u);
+            vector3.z = v;
+        }
+
+
+        //  ParametricGeometry - a function that takes in a u and v value each between 0 and 1 and modifies a third Vector3
+        //  argument
+        var geometry = new THREE.ParametricGeometry(createDingDong, 50, 50);
+        var material = new THREE.MeshBasicMaterial( {
+            color: 0x0000ff,
+            side: THREE.DoubleSide,
+            wireframe: false,
+            //vertexColors: true,
+        } );
+
+        let rotationSurface = new Object3D();
+        var dingdong = new THREE.Mesh( geometry, material ); // first layer of the surface for 'metal' look
+
+        //var matrix = getRotationMatrix(0.5, 0.5, 0.5);
+        const m = new Matrix4();
+
+        var newMatrix = m.setPosition(getRotationMatrix(0.5, 0.5, 0.5));
+        //m.fromArray(matrix)
+        dingdong.setRotationFromMatrix(newMatrix);
+
+        rotationSurface.add(dingdong);
+        scene.add( rotationSurface );
+
+        // second geometry and material arguments for creating a wireframe layer
+        var geometry2 = new THREE.ParametricGeometry(createDingDong, 50, 50);
+        var material2 = new THREE.MeshBasicMaterial( {
+            color: 0x440000,
+            side: THREE.DoubleSide,
+            wireframe: true,
+        } );
+        var dingdong2 = new THREE.Mesh( geometry2, material2 );
+
+        //var matrix = getRotationMatrix(0.5, 0.5, 0.5);
+        //const m = new Matrix4();
+
+        //m.fromArray(matrix)
+        //console.log(m.elements)
+        console.log(newMatrix.elements);
+
+        dingdong2.setRotationFromMatrix(newMatrix);
+
+        rotationSurface.add(dingdong2);
+        scene.add( rotationSurface );
+
+        // controls.update() must be called after any manual changes to the camera's transform
+        camera.position.z = 4;
+
+        //var matrix = getRotationMatrix(0.5, 0.5, 0.5);
+        //const m = new Matrix4();
+
+        //m.fromArray(matrix)
+        //console.log(m.elements)
+        //camera.setRotationFromMatrix(m.setPosition(matrix));
+        //console.log(m.elements);
+        controls.update();
+
+        function animate() {
+            requestAnimationFrame( animate );
+
+            //for rotations
+            //dingdong.rotation.x += 0.01;
+            //dingdong.rotation.y += 0.01;
+            //dingdong2.rotation.x += 0.01;
+            //dingdong2.rotation.y += 0.01;
+            // required if controls.enableDamping or controls.autoRotate are set to true
+          //rotate 30 degrees on world X
+            renderer.render( scene, camera );
+            controls.update();
+
+            rotationSurface.rotation.copy(camera.rotation);
+            camera.lookAt(rotationSurface.position)
+        }
+        animate();
+    </script>
+
+</body>
+</html>
