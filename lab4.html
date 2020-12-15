@@ -41,7 +41,7 @@
   // set camera argument
   var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
-  var renderer = new THREE.WebGLRenderer({antialias: true});
+  var renderer = new THREE.WebGLRenderer({/*antialias: true*/ alpha: true});
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.body.appendChild(renderer.domElement);
 
@@ -108,8 +108,9 @@
   scene.add(markerRoot)
   var artoolkitMarker = new THREEx.ArMarkerControls(arToolkitContext, markerRoot, {
     type : 'pattern',
-    //patternUrl : 'http://thorstenbux.github.io/jsartoolkit5/examples/Data/patt.hiro',
-    patternUrl : 'https://nadiiasky.github.io/pattern-N.patt',
+    preset: 'custom',
+    patternUrl : 'http://thorstenbux.github.io/jsartoolkit5/examples/Data/patt.hiro',
+    //patternUrl : 'https://nadiiasky.github.io/pattern-N.patt',
   })
 
   // build a smoothedControls
