@@ -129,21 +129,38 @@
 	//		add an object in the scene
 	//////////////////////////////////////////////////////////////////////////////////
 
+    var createDingDong = function(u, v, vector3) {
+        //u in [0; 2Pi],  v in (-infinity; 1)
+        u *= 2 * Math.PI;
+        v = v * -2 + 1;
+
+
+        var arg = v * Math.sqrt(1 - v);
+        vector3.x = arg * Math.cos(u);
+        vector3.y = arg * Math.sin(u);
+        vector3.z = v;
+  }
+
 	var arWorldRoot = smoothedRoot
 
 	// add a torus knot
-	var geometry	= new THREE.BoxGeometry(1,1,1);
-	var material	= new THREE.MeshNormalMaterial({
+	var geometry = new THREE.ParametricGeometry(createDingDong, 50, 50);
+	var material = new THREE.MeshBasicMaterial( {
 		transparent : true,
-		opacity: 0.5,
-		side: THREE.DoubleSide
+		color: 0x0000ff,
+        side: THREE.DoubleSide,
+        wireframe: false,
 	});
 	var mesh	= new THREE.Mesh( geometry, material );
 	mesh.position.y	= geometry.parameters.height/2
 	arWorldRoot.add( mesh );
 
-	var geometry	= new THREE.TorusKnotGeometry(0.3,0.1,64,16);
-	var material	= new THREE.MeshNormalMaterial();
+	var geometry	= new THREE.ParametricGeometry(createDingDong, 50, 50);
+	var material	= new THREE.MeshBasicMaterial( {
+        color: 0x440000,
+        side: THREE.DoubleSide,
+        wireframe: true,
+    } );
 	var mesh	= new THREE.Mesh( geometry, material );
 	mesh.position.y	= 0.5
 	arWorldRoot.add( mesh );
